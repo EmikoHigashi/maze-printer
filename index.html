@@ -68,7 +68,7 @@
     }
 
     function drawMaze() {
-        const cellSize = 25; // 印刷時にちょうど良いサイズ
+        const cellSize = 25; // 1マスのサイズ
         canvas.width = maze[0].length * cellSize;
         canvas.height = maze.length * cellSize;
 
@@ -84,11 +84,27 @@
             }
         }
 
-        // スタート・ゴール地点に文字を入れる
+        // --- ここから修正部分 ---
+        
+        // 文字のスタイル設定
         ctx.fillStyle = "red";
-        ctx.font = "bold 16px sans-serif";
-        ctx.fillText("S", 5, 20);
-        ctx.fillText("G", canvas.width - 20, canvas.height - 5);
+        ctx.font = "bold 20px sans-serif"; // 文字を少し大きくしました
+        ctx.textAlign = "center";      // 文字の水平方向の中心を指定
+        ctx.textBaseline = "middle";   // 文字の垂直方向の中心を指定
+
+        // スタート (S) の描画位置を調整
+        // 1列目、2行目 (maze[1][0] がスタートの通路)
+        const sX = 0 * cellSize + cellSize / 2; // 通路マスの中心
+        const sY = 1 * cellSize + cellSize / 2;
+        ctx.fillText("S", sX, sY);
+
+        // ゴール (G) の描画位置を調整
+        // 最終列、最後から2行目 (maze[h-2][w-1] がゴールの通路)
+        const gX = (maze[0].length - 1) * cellSize + cellSize / 2;
+        const gY = (maze.length - 2) * cellSize + cellSize / 2;
+        ctx.fillText("G", gX, gY);
+        
+        // --- ここまで修正部分 ---
     }
 
     // 初回生成
