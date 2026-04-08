@@ -1,6 +1,8 @@
 # maze-printer
 A4 printable maze generator for GitHub Pages
 
+https://emikohigashi.github.io/maze-printer/
+
 # 印刷用 迷路ジェネレーター (Web版)
 
 このツールは、印刷（A4サイズ）に最適な迷路をランダムに生成し、PDFとして保存できるツールです。
