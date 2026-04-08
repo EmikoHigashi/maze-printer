@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>A4 Printable Maze Generator</title>
+    <style>
+        /* 画面表示用のスタイル */
+        body { font-family: sans-serif; background: #f0f0f0; padding: 20px; }
+        .no-print { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        #maze-container { background: white; padding: 20px; display: inline-block; border: 1px solid #ccc; }
+        canvas { display: block; }
+        
+        /* 印刷・PDF保存用の設定 */
+        @media print {
+            body { background: white; padding: 0; margin: 0; }
+            .no-print { display: none; } /* 操作パネルを隠す */
+            #maze-container { border: none; padding: 0; }
+            @page { size: A4 portrait; margin: 10mm; } /* A4縦、余白10mm */
+        }
+    </style>
+</head>
+<body>
+
+<div class="no-print">
+    <h1>迷路ジェネレーター</h1>
+    <p>サイズを設定して「生成」を押し、「PDF/印刷」ボタンでA4保存できます。</p>
+    <label>幅: <input type="number" id="width" value="21" step="2" min="5" style="width:50px;"></label>
+    <label>高さ: <input type="number" id="height" value="29" step="2" min="5" style="width:50px;"></label>
+    <button onclick="generateMaze()">新しい迷路を生成</button>
+    <button onclick="window.print()" style="background: #4CAF50; color: white; border: none; padding: 5px 15px; cursor: pointer;">PDF / 印刷</button>
+</div>
+
+<div id="maze-container">
+    <canvas id="mazeCanvas"></canvas>
+</div>
+
+<script>
+    const canvas = document.getElementById('mazeCanvas');
+    const ctx = canvas.getContext('2d');
+    let maze = [];
+
+    function generateMaze() {
+        const w = parseInt(document.getElementById('width').value);
+        const h = parseInt(document.getElementById('height').value);
+        
+        // 穴掘り法（Digging Method）による迷路生成
+        maze = Array.from({ length: h }, () => Array(w).fill(1));
+        
+        function dig(x, y) {
+            const dirs = [[0, -2], [0, 2], [-2, 0], [2, 0]].sort(() => Math.random() - 0.5);
+            maze[y][x] = 0;
+
+            for (let [dx, dy] of dirs) {
+                let nx = x + dx, ny = y + dy;
+                if (ny > 0 && ny < h - 1 && nx > 0 && nx < w - 1 && maze[ny][nx] === 1) {
+                    maze[y + dy/2][x + dx/2] = 0;
+                    dig(nx, ny);
+                }
+            }
+        }
+        dig(1, 1);
+        
+        // スタートとゴール
+        maze[1][0] = 0; // スタート（左上）
+        maze[h-2][w-1] = 0; // ゴール（右下）
+        
+        drawMaze();
+    }
+
+    function drawMaze() {
+        const cellSize = 25; // 印刷時にちょうど良いサイズ
+        canvas.width = maze[0].length * cellSize;
+        canvas.height = maze.length * cellSize;
+
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.fillStyle = "black";
+        for (let y = 0; y < maze.length; y++) {
+            for (let x = 0; x < maze[y].length; x++) {
+                if (maze[y][x] === 1) {
+                    ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                }
+            }
+        }
+
+        // スタート・ゴール地点に文字を入れる
+        ctx.fillStyle = "red";
+        ctx.font = "bold 16px sans-serif";
+        ctx.fillText("S", 5, 20);
+        ctx.fillText("G", canvas.width - 20, canvas.height - 5);
+    }
+
+    // 初回生成
+    generateMaze();
+</script>
+
+</body>
+</html>
